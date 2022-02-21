@@ -1,4 +1,3 @@
-#change 3
 library("plm")
 
 pop_data <- read.csv("pop_Data.csv", dec = ".")
@@ -62,7 +61,61 @@ summary(datafinal[,3:15])
 summary(datafinal$Country.Name)
 levels(datafinal$Country.Name)
 
-#region separation
+#region & country separation
+install.packages("operators")
+library(operators)
+data_countries <- subset(datafinal, Country.Name %!in% c("Middle East & North Africa",
+                                                      "Sub-Saharan Africa",
+                                                      "Europe & Central Asia",
+                                                      "East Asia & Pacific",
+                                                      "South Asia",
+                                                      "Latin America & Caribbean",
+                                                      "North America",
+                                                      "Africa Eastern and Southern",
+                                                      "Africa Western and Central",
+                                                      "Arab World",
+                                                      "Caribbean small states",
+                                                      "Central Europe and the Baltics",
+                                                      "Channel Islands",
+                                                      "Early-demographic dividend",
+                                                      "East Asia & Pacific (excluding high income)",
+                                                      "East Asia & Pacific (IDA & IBRD countries)",
+                                                      "Euro area",
+                                                      "European Union",
+                                                      "Europe & Central Asia (excluding high income)",
+                                                      "Europe & Central Asia (IDA & IBRD countries)",
+                                                      "Fragile and conflict affected situations",
+                                                      "Heavily indebted poor countries (HIPC)",
+                                                      "High income",
+                                                      "IBRD only",
+                                                      "IDA & IBRD total",
+                                                      "IDA blend",
+                                                      "IDA only",
+                                                      "IDA total",
+                                                      "Late-demographic dividend" ,
+                                                      "Latin America & Caribbean (excluding high income)",
+                                                      "Latin America & the Caribbean (IDA & IBRD countries)",
+                                                      "Least developed countries: UN classification",
+                                                      "Low & middle income",
+                                                      "Low income",
+                                                      "Lower middle income",
+                                                      "Middle East & North Africa (excluding high income)",
+                                                      "Middle East & North Africa (IDA & IBRD countries)",
+                                                      "Middle income",
+                                                      "North America",
+                                                      "Not classified",
+                                                      "OECD members",
+                                                      "Other small states",
+                                                      "Pacific island small states",
+                                                      "Post-demographic dividend",
+                                                      "Pre-demographic dividend",
+                                                      "Small states",
+                                                      "South Asia (IDA & IBRD)",
+                                                      "Sub-Saharan Africa (excluding high income)",
+                                                      "Sub-Saharan Africa (IDA & IBRD countries)",
+                                                      "Upper middle income",
+                                                      "World"))
+
 data_regions <- subset(datafinal, Country.Name == c("Middle East & North Africa",
                                                     "Sub-Saharan Africa",
                                                     "Europe & Central Asia",
@@ -70,6 +123,7 @@ data_regions <- subset(datafinal, Country.Name == c("Middle East & North Africa"
                                                     "South Asia",
                                                     "Latin America & Caribbean",
                                                     "North America"))
+
 data_migration <- subset(datafinal, !is.na(datafinal$Net.migration[]))
 
 
