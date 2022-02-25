@@ -1,3 +1,4 @@
+install.packages("operators")
 library("plm")
 
 pop_data <- read.csv("pop_Data.csv", dec = ".")
@@ -12,12 +13,12 @@ colnames(pop_data) <- c("Year",
                         "Life.expectancy.total",
                         "Life.expectancy.male",
                         "Life.expectancy.female",
-                        "Population.%growth",
+                        "Population.percentgrowth",
                         "Population.female",
                         "Population.male",
                         "Population.total",
-                        "Population.%male",
-                        "Population.%female",
+                        "Population.percentmale",
+                        "Population.percentfemale",
                         "Net.migration")
 pop_data = pdata.frame(pop_data,c("Country.Name", "Year"))
 pop_data = subset(pop_data, select = -c(Year.Code))
@@ -39,30 +40,28 @@ colnames(datafinal) <- c("Country.Name",
                          "Life.expectancy.total",
                          "Life.expectancy.male",
                          "Life.expectancy.female",
-                         "Population.%growth",
+                         "Population.percentgrowth",
                          "Population.female",
                          "Population.male",
                          "Population.total",
-                         "Population.%male",
-                         "Population.%female",
+                         "Population.percentmale",
+                         "Population.percentfemale",
                          "Net.migration",
                          "GDP")
-str(datafinal)
 
-  #watch out for the 2021 year... we do not have the observations there
+#final data overview
+str(datafinal)
 summary(datafinal$Year)
 levels(datafinal$Year)
 datafinal[,4:15] <- sapply(datafinal[, 4:15], as.numeric)
 datafinal$Country.Code <- as.factor(datafinal$Country.Code)
-
 str(datafinal)
 summary(datafinal[,3:15])
-
 summary(datafinal$Country.Name)
 levels(datafinal$Country.Name)
 
+
 #region & country separation
-install.packages("operators")
 library(operators)
 data_countries <- subset(datafinal, Country.Name %!in% c("Middle East & North Africa",
                                                       "Sub-Saharan Africa",
@@ -126,40 +125,52 @@ data_regions <- subset(datafinal, Country.Name == c("Middle East & North Africa"
 
 data_migration <- subset(datafinal, !is.na(datafinal$Net.migration[]))
 
+summary(data_countries$Country.Name)
+summary(data_regions$Country.Name)
+colnames(data_countries)
 
 
-
-
-
-
-
-
-#visualization but we need proper datasets so do not use yet
+#visualization
 library(ggplot2)
+library(dplyr)
+
+#COUNTRIES
+#correlation matrix
+corrplot(data_countries %>% select_if(is.numeric),abs = F,method="color")
+
+
+
+
 
 #popgrowth by birthrate
-ggplot(data=datafinal_num, aes(x=Birth.rate, y=Population.percentgrowth))+
+ggplot(data=data_countries, aes(x=Birth.rate, y=Population.percentgrowth))+
   geom_point()+
-  geom_smooth() 
+  geom_smooth() +
+  facet_wrap(~Year, nrow = 3)
 
 #popgrowth by lifeexpectancy
-ggplot(data=datafinal_num)+
-  geom_point(mapping = aes(x=Life.expectancy.total, y=Population.percentgrowth))+
+ggplot(data=data_countries, aes(x=Life.expectancy.total, y=Population.percentgrowth))+
+  geom_point()+
+  geom_smooth() +
   facet_wrap(~Year, nrow = 3)
 
 #popgrowth by netmigration
-ggplot(data=datafinal_num, aes(x=Net.migration, y=Population.percentgrowth))+
-  geom_point()
-  
+ggplot(data=data_countries, aes(x=Net.migration, y=Population.percentgrowth))+
+  geom_point()+
+  geom_smooth()
+
+plot(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])]), main = "Net migration density")
+polygon(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])]), col="red", border="blue")
+
+
 
 #popgrowth by gdp (not numeric yet)
-ggplot(data=datafinal_num, aes(x=GDP, y=Population.percentgrowth))+
+ggplot(data=data_countries, aes(x=GDP, y=Population.percentgrowth))+
   geom_point()
-  
 
 
 #birthrate by lifeexpectancy
-ggplot(data=datafinal_num, aes(x=Life.expectancy.total, y=Birth.rate))+
+ggplot(data=data_countries, aes(x=Life.expectancy.total, y=Birth.rate))+
   geom_point(aes(color = Year))
   
 
