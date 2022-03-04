@@ -115,7 +115,7 @@ data_countries <- subset(datafinal, Country.Name %!in% c("Middle East & North Af
                                                       "Upper middle income",
                                                       "World"))
 
-data_regions <- subset(datafinal, Country.Name == c("Middle East & North Africa",
+data_regions <- subset(datafinal, Country.Name %in% c("Middle East & North Africa",
                                                     "Sub-Saharan Africa",
                                                     "Europe & Central Asia",
                                                     "East Asia & Pacific",
@@ -133,14 +133,11 @@ colnames(data_countries)
 #visualization
 library(ggplot2)
 library(dplyr)
+library(arm)
 
 #COUNTRIES
 #correlation matrix
-corrplot(data_countries %>% select_if(is.numeric),abs = F,method="color")
-
-
-
-
+corrplot(data_countries %>% select_if(is.numeric),abs=F, n.col.legend = 8)
 
 #popgrowth by birthrate
 ggplot(data=data_countries, aes(x=Birth.rate, y=Population.percentgrowth))+
@@ -163,18 +160,52 @@ plot(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])
 polygon(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])]), col="red", border="blue")
 
 
-
 #popgrowth by gdp (not numeric yet)
 ggplot(data=data_countries, aes(x=GDP, y=Population.percentgrowth))+
-  geom_point()
-
+  geom_point()+
+  geom_smooth() +
+  facet_wrap(~Year, nrow = 3)
+cor(data_countries$Population.percentgrowth,data_countries$GDP)
 
 #birthrate by lifeexpectancy
 ggplot(data=data_countries, aes(x=Life.expectancy.total, y=Birth.rate))+
-  geom_point(aes(color = Year))
-  
+  geom_point()+
+  geom_smooth() +
+  facet_wrap(~Year, nrow = 3)  
+
+#net mimgration vs GDP
+ggplot(data=subset(data_countries, Year == 2017), aes(x=GDP, y=Net.migration), color = Country.Name)+
+  geom_point()
 
 
-#line chart
+#REGIONS
+#total population development in time
 ggplot(data_regions, aes(x = Year, y = Population.total, group = Country.Name, color = Country.Name)) +
      geom_line()
+
+#population growth developmet in time
+ggplot(data_regions, aes(x = Year, y = Population.percentgrowth, group = Country.Name, color = Country.Name)) +
+  geom_line()
+
+#comparison of birthrate
+ggplot(data_regions, aes(x = Year, y = Birth.rate, group = Country.Name, color = Country.Name)) +
+  geom_line()
+
+#comparison of life expectancy
+ggplot(data_regions, aes(x = Year, y = Life.expectancy.total, group = Country.Name, color = Country.Name)) +
+  geom_line()
+
+#comparison of GDP
+ggplot(data_regions, aes(x = Year, y = GDP, group = Country.Name, color = Country.Name)) +
+  geom_line()
+
+#comparison of migration
+ggplot(data= data_regions, aes(x=Year, y=Net.migration, color = Country.Name))+
+  geom_point()+
+  scale_x_discrete(breaks=c(2002, 2007, 2012, 2017))
+
+#GDP vs Net migration
+ggplot(data=subset(data_regions, Year == 2017), aes(x=GDP, y=Net.migration), color = Country.Name)+
+  geom_point()+
+  geom_abline()
+abline
