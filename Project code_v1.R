@@ -54,8 +54,12 @@ str(datafinal)
 summary(datafinal$Year)
 levels(datafinal$Year)
 datafinal[,4:15] <- sapply(datafinal[, 4:15], as.numeric)
+datafinal <- datafinal[datafinal$Year!=2020,]
 datafinal$Country.Code <- as.factor(datafinal$Country.Code)
 str(datafinal)
+
+summary(datafinal)
+
 summary(datafinal[,3:15])
 summary(datafinal$Country.Name)
 levels(datafinal$Country.Name)
@@ -219,10 +223,32 @@ ggplot(data=data_countries, aes(x=GDP, y=Life.expectancy.total), color = Country
 library(ggplot2)
 library(gganimate)
 library(transformr)
+
+#GDP vs Life expectancy for regions
 p <- ggplot(data=data_regions, aes(x = GDP, y= Life.expectancy.total, color = Country.Name, size = Population.total)) + 
   geom_point() + 
   transition_states(Year, 4, 1) + 
   shadow_mark(size = 2, colour = 'grey')
 animate(p, fps = 20, width = 800, height = 350)
 
+#GDP vs Life expectancy for countries
+p2 <- ggplot(data=data_countries, aes(x = log(GDP), y= Life.expectancy.total, size = Population.total)) + 
+  geom_point() + 
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')
+animate(p2, fps = 20, width = 800, height = 350)
+
+#GDP procentage growth for regions
+p3 <- ggplot(data=data_regions, aes(x = GDP, y= Population.percentgrowth, color = Country.Name, size = Population.total)) + 
+  geom_point() + 
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')
+animate(p3, fps = 20, width = 800, height = 350)
+
+
+p4 <- ggplot(data=data_countries, aes(x = GDP, y= Population.percentgrowth, color = Country.Name, size = Population.total)) + 
+  geom_point() + 
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')
+animate(p4, fps = 20, width = 800, height = 350)
   
