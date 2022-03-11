@@ -160,7 +160,7 @@ plot(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])
 polygon(density(data_countries$Net.migration[!is.na(data_countries$Net.migration[])]), col="red", border="blue")
 
 
-#popgrowth by gdp (not numeric yet)
+#popgrowth by gdp 
 ggplot(data=data_countries, aes(x=GDP, y=Population.percentgrowth))+
   geom_point()+
   geom_smooth() +
@@ -205,7 +205,24 @@ ggplot(data= data_regions, aes(x=Year, y=Net.migration, color = Country.Name))+
   scale_x_discrete(breaks=c(2002, 2007, 2012, 2017))
 
 #GDP vs Net migration
-ggplot(data=subset(data_regions, Year == 2017), aes(x=GDP, y=Net.migration), color = Country.Name)+
+ggplot(data=subset(data_countries, Year == 2017), aes(x=GDP, y=Net.migration), color = Country.Name)+
   geom_point()+
   geom_abline()
 abline
+
+# GDP vs Life Expectancy
+ggplot(data=data_countries, aes(x=GDP, y=Life.expectancy.total), color = Country.Name)+
+  geom_point()+
+  geom_smooth()
+
+
+library(ggplot2)
+library(gganimate)
+library(transformr)
+p <- ggplot(data=data_regions, aes(x = GDP, y= Life.expectancy.total, color = Country.Name, size = Population.total)) + 
+  geom_point() + 
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')
+animate(p, fps = 20, width = 800, height = 350)
+
+  
