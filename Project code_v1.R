@@ -67,7 +67,7 @@ levels(datafinal$Country.Name)
 #standarization
 pre_datafinal_scaled <- as.data.frame(scale(datafinal[4:15]))
 datafinal_scaled <- cbind(datafinal[1:3], pre_datafinal_scaled)
-summary(datafinal_scaled)
+str(datafinal_scaled)
 
 #region & country separation
 library(operators)
@@ -138,66 +138,13 @@ summary(data_regions$Country.Name)
 colnames(data_countries)
 
 #scaled seperated data
-data_countries_scaled <- subset(datafinal_scaled, Country.Name %!in% c("Middle East & North Africa",
-                                                         "Sub-Saharan Africa",
-                                                         "Europe & Central Asia",
-                                                         "East Asia & Pacific",
-                                                         "South Asia",
-                                                         "Latin America & Caribbean",
-                                                         "North America",
-                                                         "Africa Eastern and Southern",
-                                                         "Africa Western and Central",
-                                                         "Arab World",
-                                                         "Caribbean small states",
-                                                         "Central Europe and the Baltics",
-                                                         "Channel Islands",
-                                                         "Early-demographic dividend",
-                                                         "East Asia & Pacific (excluding high income)",
-                                                         "East Asia & Pacific (IDA & IBRD countries)",
-                                                         "Euro area",
-                                                         "European Union",
-                                                         "Europe & Central Asia (excluding high income)",
-                                                         "Europe & Central Asia (IDA & IBRD countries)",
-                                                         "Fragile and conflict affected situations",
-                                                         "Heavily indebted poor countries (HIPC)",
-                                                         "High income",
-                                                         "IBRD only",
-                                                         "IDA & IBRD total",
-                                                         "IDA blend",
-                                                         "IDA only",
-                                                         "IDA total",
-                                                         "Late-demographic dividend" ,
-                                                         "Latin America & Caribbean (excluding high income)",
-                                                         "Latin America & the Caribbean (IDA & IBRD countries)",
-                                                         "Least developed countries: UN classification",
-                                                         "Low & middle income",
-                                                         "Low income",
-                                                         "Lower middle income",
-                                                         "Middle East & North Africa (excluding high income)",
-                                                         "Middle East & North Africa (IDA & IBRD countries)",
-                                                         "Middle income",
-                                                         "North America",
-                                                         "Not classified",
-                                                         "OECD members",
-                                                         "Other small states",
-                                                         "Pacific island small states",
-                                                         "Post-demographic dividend",
-                                                         "Pre-demographic dividend",
-                                                         "Small states",
-                                                         "South Asia (IDA & IBRD)",
-                                                         "Sub-Saharan Africa (excluding high income)",
-                                                         "Sub-Saharan Africa (IDA & IBRD countries)",
-                                                         "Upper middle income",
-                                                         "World"))
+pre_data_countries_scaled <- as.data.frame(scale(data_countries[4:15]))
+data_countries_scaled <- cbind(data_countries[1:3], pre_data_countries_scaled)
+str(data_countries_scaled)   
 
-data_regions_scaled <- subset(datafinal_scaled, Country.Name %in% c("Middle East & North Africa",
-                                                      "Sub-Saharan Africa",
-                                                      "Europe & Central Asia",
-                                                      "East Asia & Pacific",
-                                                      "South Asia",
-                                                      "Latin America & Caribbean",
-                                                      "North America"))
-
+pre_data_regions_scaled <- as.data.frame(scale(data_regions[4:15]))
+data_regions_scaled <- cbind(data_regions[1:3], pre_data_regions_scaled)
+str(data_regions_scaled) 
 
 
 #visualization
@@ -207,7 +154,7 @@ library(arm)
 
 #COUNTRIES
 #correlation matrix
-corrplot(data_countries %>% select_if(is.numeric),abs=F, n.col.legend = 8)
+corrplot(data_countries_scaled %>% select_if(is.numeric),abs=F, n.col.legend = 8)
 
 #popgrowth by birthrate
 ggplot(data=data_countries, aes(x=Birth.rate, y=Population.percentgrowth))+
@@ -244,8 +191,12 @@ ggplot(data=data_countries, aes(x=Life.expectancy.total, y=Birth.rate))+
   facet_wrap(~Year, nrow = 3)  
 
 #net mimgration vs GDP
-ggplot(data=subset(data_countries, Year == 2017), aes(x=GDP, y=Net.migration), color = Country.Name)+
-  geom_point()
+ggplot(data=subset(data_regions_scaled, Year == 2017), aes(x=GDP, y=Net.migration, color = Country.Name))+
+  geom_point()+
+  scale_colour_discrete(name="Region")+
+  ggtitle("Net migration in relation to GDP in 2017")+
+  ylab("Net migration(scaled)") + 
+  xlab("GDP (scaled)")
 
 
 #REGIONS
@@ -266,8 +217,12 @@ ggplot(data_regions, aes(x = Year, y = Life.expectancy.total, group = Country.Na
   geom_line()
 
 #comparison of GDP
-ggplot(data_regions, aes(x = Year, y = GDP, group = Country.Name, color = Country.Name)) +
-  geom_line()
+ggplot(data_regions_scaled, aes(x = Year, y = GDP, group = Country.Name, color = Country.Name)) +
+  geom_line()+
+  scale_colour_discrete(name="Region")+
+  ggtitle("GDP from 2000-2019")+
+  ylab("GDP(scaled)") + 
+  xlab("Year")
 
 #comparison of migration
 ggplot(data= data_regions, aes(x=Year, y=Net.migration, color = Country.Name))+
@@ -291,30 +246,93 @@ library(gganimate)
 library(transformr)
 
 #GDP vs Life expectancy for regions
-p <- ggplot(data=data_regions, aes(x = GDP, y= Life.expectancy.total, color = Country.Name, size = Population.total)) + 
+p <- ggplot(data=data_regions_scaled, aes(x = GDP, y= Life.expectancy.total, color = Country.Name, size = Population.total)) + 
   geom_point() + 
   transition_states(Year, 4, 1) + 
-  shadow_mark(size = 2, colour = 'grey')
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_colour_discrete(name="Region")+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Life expectancy in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Life expectancy (scaled)")
 animate(p, fps = 20, width = 800, height = 350)
 
 #GDP vs Life expectancy for countries
-p2 <- ggplot(data=data_countries, aes(x = log(GDP), y= Life.expectancy.total, size = Population.total)) + 
+p2 <- ggplot(data=data_countries_scaled, aes(x = log(GDP), y= Life.expectancy.total, size = Population.total)) + 
   geom_point() + 
   transition_states(Year, 4, 1) + 
-  shadow_mark(size = 2, colour = 'grey')
+  shadow_mark(size = 1, colour = 'grey')+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Life expectancy in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Life expectancy (scaled)")
 animate(p2, fps = 20, width = 800, height = 350)
 
 #GDP procentage growth for regions
-p3 <- ggplot(data=data_regions, aes(x = GDP, y= Population.percentgrowth, color = Country.Name, size = Population.total)) + 
+p3 <- ggplot(data=data_regions_scaled, aes(x = GDP, y= Population.percentgrowth, color = Country.Name, size = Population.total)) + 
   geom_point() + 
   transition_states(Year, 4, 1) + 
-  shadow_mark(size = 2, colour = 'grey')
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_colour_discrete(name="Region")+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Population growth in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Population growth (scaled)")
 animate(p3, fps = 20, width = 800, height = 350)
 
 
-p4 <- ggplot(data=data_countries, aes(x = GDP, y= Population.percentgrowth, color = Country.Name, size = Population.total)) + 
+p4 <- ggplot(data=data_countries_scaled, aes(x = GDP, y= Population.percentgrowth, size = Population.total)) + 
   geom_point() + 
   transition_states(Year, 4, 1) + 
-  shadow_mark(size = 2, colour = 'grey')
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Population growth in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Population growth (scaled)")
 animate(p4, fps = 20, width = 800, height = 350)
   
+#netmig vs GDP for regions
+p5 <- ggplot(data=data_regions_scaled, aes(x=GDP, y=Net.migration, color = Country.Name, size = Population.total))+
+  geom_point()+
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_colour_discrete(name="Region")+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Net migration in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Net Migration (scaled)")
+animate(p5, fps = 20, width = 800, height = 350)
+
+#birthrate vs GDP
+p6 <- ggplot(data=data_regions_scaled, aes(x=GDP, y=Birth.rate, color = Country.Name, size = Population.total))+
+  geom_point()+
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_colour_discrete(name="Region")+
+  scale_size_continuous(name = "Size of population (scaled)")+
+  ggtitle("Birth rate in relation to GDP from 2000-2019")+
+  xlab("GDP (scaled)") + 
+  ylab("Birth rate (scaled)")
+animate(p6, fps = 20, width = 800, height = 350)
+
+#total population vs birth rate
+p7 <- ggplot(data=data_regions_scaled, aes(x=Birth.rate, y=Population.total, color = Country.Name))+
+  geom_point(size = 5)+
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')+
+  scale_colour_discrete(name="Region")+
+  ggtitle("Total population in relation to birth rate from 2000-2019")+
+  ylab("Total population (scaled)") + 
+  xlab("Birth rate (scaled)")
+animate(p7, fps = 20, width = 800, height = 350)
+
+#total pop vs life expectancy
+p8 <- ggplot(data=data_regions_scaled, aes(x=Life.expectancy.total, y=Population.total, color = Country.Name))+
+  geom_point(size = 5)+
+  transition_states(Year, 4, 1) + 
+  shadow_mark(size = 2, colour = 'grey')+
+  C
+  ggtitle("Total population in relation to life expectancy from 2000-2019")+
+  ylab("Total population (scaled)") + 
+  xlab("Life expectancy (scaled)")
+animate(p8, fps = 20, width = 800, height = 350)
